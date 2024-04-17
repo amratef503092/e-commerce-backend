@@ -9,6 +9,7 @@ const database = require('./config/database');
 const categoryRoute = require('./api/categoryRoute');
 const subCategoryRoute = require('./api/subcategory_route');
 const productRoute = require('./api/product_route');
+const brandRoute = require('./api/brand_route');
 
 const ApiError = require('./utility/error');
 const globalErrorHandlerMiddleware = require('./middleware/error_middleware');
@@ -28,6 +29,9 @@ app.use(express.json());
 app.use('/api/v1/categories', categoryRoute);
 app.use('/api/v1/subcategories', subCategoryRoute);
 app.use('/api/v1/product', productRoute);
+app.use('/api/v1/brand', brandRoute);
+
+
 
 
 app.all('*', (req, res, next) => {

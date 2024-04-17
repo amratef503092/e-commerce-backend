@@ -13,6 +13,7 @@ exports.getBrands = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
 
   const brands = await Brand.find({}).skip(skip).limit(limit);
+
   res.status(200).json({ results: brands.length, page, data: brands });
 });
 
@@ -23,7 +24,7 @@ exports.getBrand = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const brand = await Brand.findById(id);
   if (!brand) {
-    return next(new ApiError(`No brand for this id ${id}`, 404));
+    return next(new ApiError(404, `No brand for this id ${id}`));
   }
   res.status(200).json({ data: brand });
 });

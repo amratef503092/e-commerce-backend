@@ -64,7 +64,11 @@ exports.createCategory = asyncHandler(
             name: name,
             slug: slug,
             image: req.body.image
+        }).then((value) => {
+            console.log(category);
         });
+
+
         res.status(201).json({
             status: 'success',
             data: category

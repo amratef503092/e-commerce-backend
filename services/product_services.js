@@ -21,8 +21,7 @@ const apiResponse = require('../utility/api_resource');
 
 
 exports.getProducts = asyncHandler(
-    async (req, res) => 
-    {
+    async (req, res) => {
 
         page = parseInt(req.query.page, 10) || 1;
         limit = parseInt(req.query.limit, 10) || 4;

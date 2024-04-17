@@ -5,14 +5,13 @@ const productSchema = new mangoose.Schema(
         name: {
             type: String,
             required: [true, 'Product name is required'],
-            unique: [true, 'Product name must be unique'],
+            // unique: [true, 'Product name must be unique'],
             minLength: [3, 'Product name must be more than 3 characters'],
             maxLength: [100, 'Product name must be less than 100 characters']
         },
         slug: {
             type: String,
             required: true,
-            unique: true,
             lowercase: true,
         },
         description: {
@@ -29,30 +28,28 @@ const productSchema = new mangoose.Schema(
         },
         discount: {
             type: {
-              type: String,
-              enum: ['fixed', 'percentage'],
-              required: true
+                type: String,
+                enum: ['fixed', 'percentage'],
+                required: true
             },
             value: {
-              type: Number,
-              required: true,
-              validate: {
-                validator: function(v) 
-                {
-                    if (this.type === 'fixed') 
-                    {
-                        return v >= 0;
-                    } 
-                  
+                type: Number,
+                required: true,
+                validate: {
+                    validator: function (v) {
+                        if (this.type === 'fixed') {
+                            return v >= 0;
+                        }
+
                         return v >= 0 && v <= 100;
-                    
-                },
-                message: props => props.path === 'fixed' ? 
-                  'Fixed discount amount must be greater than or equal to 0' : 
-                  'Discount percentage must be between 0 and 100'
-              }
+
+                    },
+                    message: props => props.path === 'fixed' ?
+                        'Fixed discount amount must be greater than or equal to 0' :
+                        'Discount percentage must be between 0 and 100'
+                }
             }
-          },
+        },
         stock: {
             type: Number,
             required: [true, 'Product stock is required'],
@@ -87,11 +84,13 @@ const productSchema = new mangoose.Schema(
             type: Number,
             default: 0,
         },
-        subCategory: {
+        subCategory: [{
+
             type: mangoose.Schema.ObjectId,
+
             ref: 'SubCategory',
             required: [true, 'Product subCategory is required']
-        },
+        }],
     },
     {
         timestamps: true,
