@@ -2,15 +2,18 @@ const express = require('express');
 
 const productServices = require('../services/product_services');
 
-const router = express.Router();
+const router = express.Router(
+    { mergeParams: true }
+);
 
-const {createProductValidator  , updateProductValidator , deleteProductValidator} = require('../utility/validators/product_validator');
+const { createProductValidator, updateProductValidator, deleteProductValidator } = require('../utility/validators/product_validator');
 
 
 router.route('/').get(productServices.getProducts).
-    post(createProductValidator, 
-    productServices.createProduct);
+    post(createProductValidator,
+        productServices.createProduct);
 
-router.route('/:id').put( updateProductValidator,productServices.updateProduct).
-delete( deleteProductValidator, productServices.deleteProduct).get(productServices.getProducts);
-    
+router.route('/:id').put(updateProductValidator, productServices.updateProduct).
+    delete(deleteProductValidator, productServices.deleteProduct).get(productServices.getProducts);
+
+module.exports = router;

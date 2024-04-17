@@ -1,7 +1,9 @@
 const express = require('express');
 const categoryServices = require('../services/category_services');
 
-const router = express.Router();
+const router = express.Router(
+    { mergeParams: true }
+);
 const { getCategoryValidator, createCategoryValidator } = require('../utility/validators/category_validator');
 // get all categories post categories;
 const subcategoriesRoute = require('./subcategory_route');
