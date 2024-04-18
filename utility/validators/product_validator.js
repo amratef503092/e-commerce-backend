@@ -25,32 +25,39 @@ exports.createProductValidator =
                     }
                 }
             ),
-
-            // what i want to do 
+        // what i want to do 
 
         check('subCategory').optional().isMongoId().
-            withMessage('Sub Category must be a valid MongoId').
-            custom(
-                async (subCategories) => {
-
-                    await subCategoryModel.find(
-                        {
-                            _id: { $exists: true, $in: subCategories }
+            withMessage('Sub Category must be a valid MongoId')
+            .custom((subcategoriesIds) =>
+                subCategoryModel.find({ _id: { $exists: true, $in: subcategoriesIds } }).then(
+                    (result) => {
+                        if (result.length < 1 || result.length !== subcategoriesIds.length) {
+                            return Promise.reject(new Error(`Invalid subcategories Ids`));
                         }
-                    ).then((result) => 
-                    {
-                        if ( result.length<1 ||result.length !== subCategories.length) 
-                        {
-                            return Promise.reject(Error('Sub Category not found'));
+                    }
+                )
+            )
+            // here he use req to get category from req.body
+            // value is subcategories ids in req.body
+            .custom((val, { req }) =>
+                subCategoryModel.find({ category: req.body.category }).then(
+                    (subcategories) => {
+                        const subCategoriesIdsInDB = [];
+                        subcategories.forEach((subCategory) => {
+                            subCategoriesIdsInDB.push(subCategory._id.toString());
+                        });
+                        // check if subcategories ids in db include subcategories in req.body (true)
+                        const checker = (target, arr) => target.every((v) => arr.includes(v));
+                        if (!checker(val, subCategoriesIdsInDB)) {
+                            return Promise.reject(
+                                new Error(`subcategories not belong to category`)
+                            );
                         }
-
-
-                    });
-
-
-
-                }
+                    }
+                )
             ),
+
         check('brand').notEmpty().withMessage('Brand is required').isMongoId().withMessage('Brand must be a valid MongoId'),
         validatorMiddleware
     ];
