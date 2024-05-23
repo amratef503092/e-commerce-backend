@@ -6,7 +6,7 @@ const apiResource = require('../utility/api_resource');
 const UserModel = require('../models/users_model');
 const otpModel = require('../models/otp_model');
 const { TokenService } = require("../utility/helper/functions");
-
+const { emailService } = require('../services/email_services');
 const { check } = require('express-validator');
 
 function createOtp(email) {
@@ -20,12 +20,10 @@ function createOtp(email) {
 
     otpModel.create(otpData);
     // send email to user
-    console.log(otpCode);
+
+    emailService.sendEmail(email, otpCode, 'verify email');
 
     return otpCode;
-
-
-
 };
 
 
@@ -106,8 +104,9 @@ exports.register = asyncHandler(async (req, res, next) => {
     if (!user) {
         return next(new ApiError(400, 'invalid data'));
     }
-    createOtp(user.email);
-    // send  email to user to verify email 
+    await createOtp(user.email);
+    // return apiResource.apiResponse(res, 200, "success", "otp sent successfully");
+    //send  email to user to verify email 
     return apiResource.apiResponse(res, 201, "success check email", user);
 
 });
@@ -238,3 +237,21 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 
 
 
+// const jwt = require('jsonwebtoken');
+
+// const authenticateToken = (req, res, next) => {
+//   // Get the token from the headers
+//   const authHeader = req.headers['authorization'];
+//   const token = authHeader && authHeader.split(' ')[1];
+
+//   if (token == null) return res.sendStatus(401); // if there isn't any token
+
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+//     if (err) return res.sendStatus(403);
+//     req.user = user;
+//     next(); // pass the execution off to whatever request the client intended
+//   });
+// };
+
+// make all user info in token
+// there will be no need to fetch user from database
