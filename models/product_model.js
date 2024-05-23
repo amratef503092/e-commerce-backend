@@ -1,4 +1,6 @@
+
 const mangoose = require('mongoose');
+
 
 const productSchema = new mangoose.Schema(
     {
@@ -99,5 +101,11 @@ const productSchema = new mangoose.Schema(
     }
 
 );
+productSchema.pre('find', function (next) {
+    this.populate('category', "name").populate('subCategory', "name").populate('brand', 'name');
+    next();
+});
+const ProductModel = mangoose.model('Product', productSchema);
 
-module.exports = mangoose.model('Product', productSchema);
+module.exports = ProductModel;
+
