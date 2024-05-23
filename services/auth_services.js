@@ -113,7 +113,9 @@ exports.register = asyncHandler(async (req, res, next) => {
 });
 
 // verify email
-
+// @desc    verify email
+// @route   POST /api/v1/auth/verifyEmail
+// @access  Public
 exports.verifyEmail = asyncHandler(async (req, res, next) => {
     const { email, otp } = req.body;
     const otpData = await otpModel.findOne({ email: email });
@@ -128,12 +130,14 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     }
 
     if (otpData.otp === otp) {
-        const user = await UserModel.findOneAndUpdate({ email: email }, { emailVerified: true });
+        const user = await UserModel.findOne({ email });
 
         if (!user) {
             return next(new ApiError(404, 'invalid email'));
         }
 
+        user.verified = true;
+        await user.updateOne(user);
         const data =
         {
             user: user,
@@ -148,6 +152,87 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     }
 
 });
+
+// resend otp
+
+// @desc    resend otp
+// @route   POST /api/v1/auth/resendOtp
+// @access  Public
+exports.resendOtp = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email: email });
+    if (!user) {
+        return next(new ApiError(404, 'invalid email'));
+    }
+    if (user.verified) {
+        return next(new ApiError(404, 'email already verified'));
+    }
+    // remove previous otp
+    await otpModel.deleteMany({ email: email });
+    createOtp(email);
+    return apiResource.apiResponse(res, 200, "success", "otp sent successfully");
+});
+
+// @desc    forgot password
+// @route   POST /api/v1/auth/forgotPassword
+// @access  Public
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email: email });
+    if (!user) {
+        return next(new ApiError(404, 'invalid email'));
+    }
+    const otp = createOtp(email);
+    return apiResource.apiResponse(res, 200, "success", otp);
+});
+
+// @desc    reset password  
+// @route   POST /api/v1/auth/resetPassword
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+    const { email, otp, password } = req.body;
+    const otpData = await otpModel.findOne({ email: email });
+    if (!otpData) {
+        return next(new ApiError(404, 'invalid email'));
+    }
+    if (otpData.otp !== otp) {
+        return next(new ApiError(404, 'invalid otp'));
+    }
+    if (otpData.createdAt + 60000 < Date.now()) {
+        return next(new ApiError(404, 'otp expired'));
+    }
+    if (otpData.otp === otp) {
+        const user = await UserModel.findOne({
+            email: email
+        });
+        if (!user) {
+            return next(new ApiError(404, 'invalid email'));
+        }
+        user.password = password;
+        await user.save();
+        await otpData.deleteOne(otpData);
+        return apiResource.apiResponse(res, 200, "success", "password reset successfully");
+    }
+});
+
+// @desc    change password
+// @route   POST /api/v1/auth/changePassword
+
+exports.changePassword = asyncHandler(async (req, res, next) => {
+    const token = req.headers.authorization.split(' ')[1];
+    if (TokenService.checkToken(token)) {
+        return next(new ApiError(404, "unauthorized access"));
+    }
+    const user = await UserModel.findById(TokenService.getIdFromToken(req.headers.authorization));
+    if (!user) {
+        return next(new ApiError(404, 'unauthorized access'));
+    }
+    user.password = req.body.newPassword;
+    await user.save();
+    return apiResource.apiResponse(res, 200, "success", "password changed successfully");
+
+});
+
 
 
 

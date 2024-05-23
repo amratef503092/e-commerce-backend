@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-
 const { check } = require('express-validator');
 const validatorMiddleware = require('../../middleware/validator_middleware');
 
@@ -24,8 +23,37 @@ exports.authaticationValidator =
         validatorMiddleware,
     ];
 
-    exports.verifyEmailValidator = [
+exports.verifyEmailValidator =
+    [
         check('email').isEmail().withMessage('Invalid email format'),
         check('otp').notEmpty().withMessage('OTP required'),
         validatorMiddleware,
     ];
+
+exports.resendOtpValidator = [
+    check('email').isEmail().withMessage('Invalid email format'),
+    validatorMiddleware,
+];
+
+exports.forgotPasswordValidator = [
+    check('email').isEmail().withMessage('Invalid email format'),
+    validatorMiddleware,
+];
+
+exports.resetPasswordValidator = [
+    check('email').isEmail().withMessage('Invalid email format'),
+    check('password').notEmpty().withMessage('Password required'),
+    check('otp').notEmpty().withMessage('OTP required'),
+    validatorMiddleware,
+];
+
+exports.changePasswordValidator = [
+    check('oldPassword').notEmpty().withMessage('Old password required'),
+    check('newPassword').notEmpty().withMessage('New password required').custom((value, { req }) => {
+        if (value === req.body.oldPassword) {
+            throw new Error('New password must be different from old password');
+        }
+        return true;
+    }),
+    validatorMiddleware,
+];

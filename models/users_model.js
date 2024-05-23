@@ -99,6 +99,14 @@ UserSchema.pre('findOneAndUpdate', async function (next) {
     this._update.password = await bcrypt.hash(this._update.password, 12);
     next();
 });
+
+UserSchema.pre('updateOne', async function (next) {
+    if (!this._update.password) {
+        next();
+    }
+    this._update.password = await bcrypt.hash(this._update.password, 12);
+    next();
+});
 // i want not return password
 UserSchema.methods.toJSON = function () {
     const userObject = this.toObject();
