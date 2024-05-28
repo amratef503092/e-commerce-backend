@@ -77,7 +77,16 @@ const UserSchema = new mangoose.Schema({
 },
 
     {
-        timestamps: true
+        timestamps: true,
+        toJSON: {
+            virtuals: true,
+            transform: function (doc, ret) {
+                delete ret.__v;
+                ret.id = ret._id;
+                delete ret._id;
+            }
+
+        },
     }
 );
 
@@ -88,34 +97,18 @@ UserSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         next();
     }
-
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
-UserSchema.pre('findOneAndUpdate', async function (next) {
-    if (!this._update.password) {
-        next();
-    }
-    this._update.password = await bcrypt.hash(this._update.password, 12);
-    next();
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
-UserSchema.pre('updateOne', async function (next) {
-    if (!this._update.password) {
-        next();
-    }
-    this._update.password = await bcrypt.hash(this._update.password, 12);
-    next();
-});
+
 // i want not return password
 UserSchema.methods.toJSON = function () {
     const userObject = this.toObject();
-    userObject.id = userObject._id;
-    delete userObject._id;
     delete userObject.password;
-    delete userObject.__v;
     return userObject;
 };
+
+
 
 UserSchema.methods.comparePassword = async function (password, hashPassword) {
     return await bcrypt.compare(password, hashPassword);

@@ -1,8 +1,7 @@
 
 const jwt = require('jsonwebtoken');
 
-class TokenService 
-{
+class TokenService {
     static checkToken(token) {
         try {
             jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
@@ -33,8 +32,6 @@ class TokenService
     static generateToken(payload) {
         return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
     }
-
-   // make token invalid
 
 
 

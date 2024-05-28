@@ -15,8 +15,23 @@ const brandSchema = new mongoose.Schema(
     },
     image: String,
   },
-  { timestamps: true }
-);
+  { 
+    timestamps: true ,
+    toJSON: { virtuals: true ,
+   
 
+    },
+    toObject: { virtuals: true }
+  }
+);
+brandSchema.methods.toJSON = function () 
+{
+  const brand = this;
+  const brandObject = brand.toObject();
+  delete brandObject.__v;
+  brandObject.id = brandObject._id;
+  delete brandObject._id;
+  return brandObject;
+}
 // 2- Create model
 module.exports = mongoose.model('Brand', brandSchema);

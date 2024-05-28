@@ -25,15 +25,13 @@ const subCategorySchema = new mongoose.Schema({
 },
 {
     timestamps: true,
-    
+    toJSON: {
         virtuals: true,
-        versionKey: false,
-        transform: function (doc, ret) {
-          delete ret._id;
-        }
-      
-
+  
+    },
+    toObject: { virtuals: true }
 }
+
 );
 subCategorySchema.virtual('id').get(function () {
     return this._id.toHexString();

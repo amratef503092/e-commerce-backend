@@ -12,23 +12,26 @@ const categorySchema = new mangoose.Schema({
         maxLength: [30, 'Category name must be less than 30 characters']
 
     },
-    slug: 
+    slug:
     {
         type: String,
         required: true,
         unique: true,
         lowercase: true,
-    } ,
-    image: 
+    },
+    image:
     {
         type: String,
         // required: true,
     },
 }, {
     timestamps: true,
-    toJSON: { virtuals: true },
+    toJSON: {
+        virtuals: true,
+    
+    },
     toObject: { virtuals: true }
-}, 
+}
 
 );
 

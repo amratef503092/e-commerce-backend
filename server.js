@@ -12,6 +12,7 @@ const productRoute = require('./api/product_route');
 const brandRoute = require('./api/brand_route');
 const userRoute = require('./api/user_route');
 const authRoute = require('./api/auth_route');
+const cartRoute = require('./api/cart_route');
 
 const ApiError = require('./utility/error');
 const globalErrorHandlerMiddleware = require('./middleware/error_middleware');
@@ -34,6 +35,8 @@ app.use('/api/v1/product', productRoute);
 app.use('/api/v1/brand', brandRoute);
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
+app.use('/api/v1/cart', cartRoute);
+
 
 
 

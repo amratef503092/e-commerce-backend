@@ -58,6 +58,12 @@ const productSchema = new mangoose.Schema(
             min: [1, 'Product stock must be more than 1'],
             max: [10000, 'Product stock must be less than 10000']
         },
+        maxOrder: {
+            type: Number,
+            required: [true, 'Product maxOrder is required'],
+            min: [1, 'Product maxOrder must be more than 1'],
+            max: [10000, 'Product maxOrder must be less than 10000']
+        },
         imageCover: {
             type: String,
             required: [true, 'Product imageCover is required']
@@ -78,7 +84,8 @@ const productSchema = new mangoose.Schema(
             ref: 'Brand',
             required: [true, 'Product brand is required']
         },
-        rating: {
+        rating:
+        {
             type: Number,
             default: 0,
         },
@@ -96,7 +103,10 @@ const productSchema = new mangoose.Schema(
     },
     {
         timestamps: true,
-        toJSON: { virtuals: true },
+        toJSON: {
+            virtuals: true,
+        
+        },
         toObject: { virtuals: true }
     }
 
@@ -105,6 +115,9 @@ productSchema.pre('find', function (next) {
     this.populate('category', "name").populate('subCategory', "name").populate('brand', 'name');
     next();
 });
+
+
+
 const ProductModel = mangoose.model('Product', productSchema);
 
 module.exports = ProductModel;

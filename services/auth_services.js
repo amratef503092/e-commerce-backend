@@ -1,13 +1,10 @@
-const ApiError = require('../utility/error');
-const jwt = require('jsonwebtoken');
-
 const asyncHandler = require('express-async-handler');
+const ApiError = require('../utility/error');
 const apiResource = require('../utility/api_resource');
 const UserModel = require('../models/users_model');
 const otpModel = require('../models/otp_model');
 const { TokenService } = require("../utility/helper/functions");
-const { emailService } = require('../services/email_services');
-const { check } = require('express-validator');
+const { emailService } = require("./email_services");
 
 function createOtp(email) {
     // generate otp 
@@ -40,7 +37,7 @@ exports.login = asyncHandler(async (req, res, next) => {
         return next(new ApiError(400, 'Please provide email and password'));
     }
 
-    const user = await UserModel.findOne({ email }).select('+password');
+    const user = await UserModel.findOne({ email });
 
     if (!user || !(await user.comparePassword(password, user.password))) {
         return next(new ApiError(401, 'Invalid email or password'));
@@ -64,11 +61,9 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/auth/getProfile
 // @access  Private
 exports.getCurrentUser = asyncHandler(async (req, res, next) => {
-    const userID = TokenService.getIdFromToken(req.headers.authorization);
-    if (!userID) {
-        return next(new ApiError(400, 'Invalid token'));
-    }
-    const user = await UserModel.findById(userID);
+    const { user } = req;
+    console.log(user.id);
+
     if (!user || !user.online) {
         return next(new ApiError(404, 'unauthorized access'));
     }
@@ -81,14 +76,7 @@ exports.getCurrentUser = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/auth/logout
 // @access  Private
 exports.logout = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (TokenService.checkToken(token)) {
-        return next(new ApiError(404, "unauthorized access"));
-    }
-    const user = await UserModel.findById(TokenService.getIdFromToken(req.headers.authorization));
-    if (!user) {
-        return next(new ApiError(404, 'unauthorized access'));
-    }
+    const { user } = req;
     user.online = false;
     await user.updateOne(user);
     apiResource.apiResponse(res, 200, "success", "logout successfully");
@@ -136,16 +124,18 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
         }
 
         user.verified = true;
+        user.online = true;
         await user.updateOne(user);
         const data =
         {
             user: user,
             token: TokenService.generateToken({ id: user.id }),
-            message: "email verified successfully"
         }
         // remove otp 
 
-        await otpData.deleteOne(otpData);
+        await otpData.deleteOne(
+            { email: email }
+        );
 
         return apiResource.apiResponse(res, 200, "success", data);
     }
@@ -218,40 +208,11 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/auth/changePassword
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (TokenService.checkToken(token)) {
-        return next(new ApiError(404, "unauthorized access"));
-    }
-    const user = await UserModel.findById(TokenService.getIdFromToken(req.headers.authorization));
-    if (!user) {
-        return next(new ApiError(404, 'unauthorized access'));
-    }
+    const { user } = req;
     user.password = req.body.newPassword;
     await user.save();
     return apiResource.apiResponse(res, 200, "success", "password changed successfully");
-
 });
 
 
 
-
-
-
-// const jwt = require('jsonwebtoken');
-
-// const authenticateToken = (req, res, next) => {
-//   // Get the token from the headers
-//   const authHeader = req.headers['authorization'];
-//   const token = authHeader && authHeader.split(' ')[1];
-
-//   if (token == null) return res.sendStatus(401); // if there isn't any token
-
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-//     if (err) return res.sendStatus(403);
-//     req.user = user;
-//     next(); // pass the execution off to whatever request the client intended
-//   });
-// };
-
-// make all user info in token
-// there will be no need to fetch user from database
