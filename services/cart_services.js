@@ -84,7 +84,11 @@ exports.checkout = async (req, res, next) => {
 
     const newOrder = await CheckoutOrder.create({
         user: user.id,
-        products,
+        products: products.map(product => ({
+            productId: product.productId,
+            quantity: product.quantity,
+            price: CalculatePrice.calculateDiscountPrice(product.productId)
+        })),
         totalPrice,
         deliveryAddress: "amr"
 
@@ -168,7 +172,7 @@ exports.getCheckoutAllOrder = asyncHandler(async (req, res, next) => {
     const orders = await CheckoutOrder.find(
         {
             user: req.user.id,
-            status: "pending"
+            // status: "pending"
         }
     );
 

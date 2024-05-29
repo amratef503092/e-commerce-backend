@@ -22,6 +22,11 @@ const checkoutOrderSchema = new mongoes.Schema(
                         type: Number,
                         required: true
                     },
+                    pricePerProduct:
+                    {
+                        type: Number,
+                        required: true
+                    }
 
                 }
             ],
@@ -30,16 +35,17 @@ const checkoutOrderSchema = new mongoes.Schema(
             type: Number,
             required: true
         },
-        deliveryAddress: {
-            type: String,
-            required: true
-        },
-        status:
-        {
-            type: ['pending', 'completed', 'cancelled'],
-            default: 'pending',
-            required: true
-        }
+        // deliveryAddress: 
+        // {
+        //     type: String,
+        //     required: true
+        // },
+        // status:
+        // {
+        //     type: ['pending', 'completed', 'cancelled'],
+        //     default: 'pending',
+        //     required: true
+        // }
     },
     {
         timestamps: true
@@ -53,15 +59,17 @@ const checkoutOrderSchema = new mongoes.Schema(
     }
 );
 
-// checkoutOrderSchema.pre('find', function (next) {
-//     this.populate({
-//         path: 'user',
-//     }).populate
-//         ({
-//             path: 'products.productId',
-//         });
-//     next();
-// });
+checkoutOrderSchema.pre('find', function (next) {
+    this.populate({
+        path: 'user',
+        // select: 'name email'
+    }).populate({
+        path: 'products.productId',
+        // select: 'name price'
+
+    })
+    next();
+});
 
 const CheckoutOrder = mongoes.model('CheckoutOrder', checkoutOrderSchema);
 
