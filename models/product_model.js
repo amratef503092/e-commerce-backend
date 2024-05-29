@@ -29,7 +29,8 @@ const productSchema = new mangoose.Schema(
             max: [1000000, 'Product price must be less than 1000000']
         },
         discount: {
-            type: {
+            type: 
+            {
                 type: String,
                 enum: ['fixed', 'percentage'],
                 required: true
@@ -52,7 +53,8 @@ const productSchema = new mangoose.Schema(
                 }
             }
         },
-        stock: {
+        stock: 
+        {
             type: Number,
             required: [true, 'Product stock is required'],
             min: [1, 'Product stock must be more than 1'],

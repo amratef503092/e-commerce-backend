@@ -1,8 +1,10 @@
 
 const CartModel = require('../models/cart_model');
+const CheckoutOrder = require('../models/check_out_model');
 const { deleteOne, createOne, getOne, getAll } = require('./handlersFactory');
 const { apiResponse } = require('../utility/api_resource');
-
+const CalculatePrice = require('../utility/helper/price_helpers');
+const asyncHandler = require('express-async-handler');
 
 // desc   Get cart
 // route  GET /api/v1/cart
@@ -66,24 +68,59 @@ exports.addProductToCart = async (req, res, next) => {
 // route POST /api/v1/cart/checkout
 // access Private -> user only
 exports.checkout = async (req, res, next) => {
-    const { user } = req.user;
-    const cart = await CartModel.findOne({ user: user._id });
+    const user = req.user;
+    const cart = await CartModel.findById(
+        req.body.cartId
+    );
     if (!cart) {
         return res.status(404).json({ message: "cart not found" });
     }
+    const { products } = cart;
+    const totalPrice = products.reduce((acc, product) => {
+        const discountedPrice = CalculatePrice.calculateDiscountPrice(product.productId);
+        return acc + (discountedPrice * product.quantity);
+    }, 0);
+
+
+    const newOrder = await CheckoutOrder.create({
+        user: user.id,
+        products,
+        totalPrice,
+        deliveryAddress: "amr"
+
+    });
     cart.products = [];
     await cart.save();
-    return apiResponse(res, 200, "Create Order Successfully", cart);
+    return apiResponse(res, 200, "success", newOrder);
 }
 
 // desc   delete product from cart
-// route  DELETE /api/v1/cart/deleteProduct/:productId
+// route  DELETE /api/v1/cart/deleteProduct/:id
 // access Private -> user only
 
-exports.deleteProductFromCart = async (req, res, next) => 
-{
+exports.deleteProductFromCart = async (req, res, next) => {
     const user = req.user;
-    const { productId } = req.params;
+    const { id } = req.params;
+    const cart = await CartModel.findOne({ user: user.id });
+    if (!cart) {
+        return res.status(404).json({ message: "cart not found" });
+    }
+    const index = cart.products.findIndex(p => p.productId._id.toString() === id);
+    if (index === -1) {
+        return res.status(404).json({ message: "product not found" });
+    }
+    cart.products.splice(index, 1);
+    await cart.save();
+    return apiResponse(res, 200, "success", 'product deleted');
+};
+
+
+// desc delete one product from cart
+// route DELETE /api/v1/cart/deleteOneProduct
+// access Private -> user only
+exports.deleteOneProduct = asyncHandler(async (req, res, next) => {
+    const { productId } = req.body;
+    const user = req.user;
     const cart = await CartModel.findOne({ user: user.id });
     if (!cart) {
         return res.status(404).json({ message: "cart not found" });
@@ -94,13 +131,23 @@ exports.deleteProductFromCart = async (req, res, next) =>
     }
     cart.products.splice(index, 1);
     await cart.save();
-    return apiResponse(res, 200, "success", cart);
-};
+    return apiResponse(res, 200, "success", 'product deleted');
+});
+
 
 // delet all product from cart
 // route DELETE /api/v1/cart/deleteAllProduct
 // access Private -> user only
-exports.deleteCart = deleteOne(CartModel);
+exports.deleteCart = async (req, res, next) => {
+    const user = req.user;
+    const cart = await CartModel.findOne({ user: user.id });
+    if (!cart) {
+        return res.status(404).json({ message: "cart not found" });
+    }
+    cart.products = [];
+    await cart.save();
+    return apiResponse(res, 200, "success", 'cart deleted');
+}
 
 // get all carts
 // route GET /api/v1/cart/getUserCarts
@@ -114,4 +161,17 @@ exports.getAllCarts = getAll(CartModel);
 
 exports.createCart = createOne(CartModel);
 
+// get all checkout orders
+// route GET /api/v1/cart/getAllCheckoutOrders
+// access Private -> user only
+exports.getCheckoutAllOrder = asyncHandler(async (req, res, next) => {
+    const orders = await CheckoutOrder.find(
+        {
+            user: req.user.id,
+            status: "pending"
+        }
+    );
+
+    return apiResponse(res, 200, "success", orders);
+});
 
