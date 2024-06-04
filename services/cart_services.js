@@ -1,10 +1,12 @@
 
+const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose');
 const CartModel = require('../models/cart_model');
 const CheckoutOrder = require('../models/check_out_model');
 const { deleteOne, createOne, getOne, getAll } = require('./handlersFactory');
 const { apiResponse } = require('../utility/api_resource');
 const CalculatePrice = require('../utility/helper/price_helpers');
-const asyncHandler = require('express-async-handler');
+const ProductModel = require('../models/product_model');
 
 // desc   Get cart
 // route  GET /api/v1/cart
@@ -29,11 +31,24 @@ exports.addProductToCart = async (req, res, next) => {
     const user = req.user;
     const { products } = req.body;
 
-    console.log(req.body);
-    console.log("____________________");
-    console.log(products);
-    console.log("____________________");
-    console.log(user.id);
+
+    const productIds = products.map(product => product.productId);
+    const productsModel = await ProductModel.find({ _id: { $in: productIds } });
+    if (productsModel.length !== productIds.length) {
+        return apiResponse(res, 404, "product not found", null);
+    }
+    // check quantity of product
+
+    products.forEach(product => {
+        const productModel = productsModel.find(p => p._id.toString() === product.productId);
+        if (productModel.stock < product.quantity) {
+            return apiResponse(res, 400, `product ${productModel.name} out of range of stock You Must less than ${productModel.stock} and max to buy ${productModel.maxOrder}`, null);
+        }
+    });
+
+
+
+    console.log("A7a");
 
     // console.log(product);
     const cart = await CartModel.findOne({ user: user.id });
@@ -87,7 +102,7 @@ exports.checkout = async (req, res, next) => {
         products: products.map(product => ({
             productId: product.productId,
             quantity: product.quantity,
-            price: CalculatePrice.calculateDiscountPrice(product.productId)
+            pricePerProduct: CalculatePrice.calculateDiscountPrice(product.productId)
         })),
         totalPrice,
         deliveryAddress: "amr"

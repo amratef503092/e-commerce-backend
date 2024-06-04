@@ -4,7 +4,8 @@ const ApiError = require('../error');
 const UserModel = require('../../models/users_model');
 const { TokenService } = require("../helper/functions");
 
-exports.protectRouteCheck = asyncHandler(async (req, res, next) => {
+exports.protectRouteCheck = (...roules) => asyncHandler(async (req, res, next,) => {
+    console.log(...roules);
     if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
         return next(new ApiError(404, 'unauthorized access'));
     }
@@ -31,6 +32,11 @@ exports.protectRouteCheck = asyncHandler(async (req, res, next) => {
     }
     console.log(user);
     req.user = user;
+    console.log(roules.includes(user.role));
+
+    if (!roules.includes(user.role)) {
+        return next(new ApiError(404, 'unauthorized access'));
+    }
     next();
     // pass to next  middleware
 });

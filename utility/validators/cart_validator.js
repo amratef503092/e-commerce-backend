@@ -1,10 +1,15 @@
 const { check } = require('express-validator');
 const validatorMiddleware = require('../../middleware/validator_middleware');
 
+const productModel = require('../../models/product_model');
+
 exports.addToCartValidator =
     [
 
-        // check('product').notEmpty().withMessage('Product required'),
-        // check('productId').isMongoId().withMessage('Invalid product id'),
+        check('products').notEmpty().withMessage('Products required')
+            .isArray().
+            withMessage('Products must be an array'),
+
+
         validatorMiddleware,
     ];

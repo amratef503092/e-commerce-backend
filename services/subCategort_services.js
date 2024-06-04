@@ -11,6 +11,7 @@ exports.setCategoryId = (req, res, next) => {
 };
 
 exports.createSubCategory = createOne(SubCategoryModel);
+
 exports.getSubCategories = getAll(SubCategoryModel);
 
 exports.deleteSubCategory = deleteOne(SubCategoryModel);
@@ -19,5 +20,5 @@ exports.updateSubCategory = updateOne(SubCategoryModel);
 
 exports.getSubCategory = getOne(SubCategoryModel);
 
-
+exports.getSubCategoriesByCategory = getAll(SubCategoryModel, 'category');
 

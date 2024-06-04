@@ -2,6 +2,10 @@
 const Category = require('../models/category_model');
 const { deleteOne, updateOne, createOne, getOne, getAll } = require('./handlersFactory');
 
+// i want to add body slug to the category
+
+
+
 // desc : get all categories
 // route : GET /api/v1/categories
 // access : public

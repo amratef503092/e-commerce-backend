@@ -18,7 +18,6 @@ exports.getProducts = getAll(productModel);
 // desc :  create product 
 // route  : POST /api/v1/products
 // access : private -> admin only
-
 exports.createProduct = createOne(productModel);
 // desc : update product
 // route : PUT /api/v1/products/:id

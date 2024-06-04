@@ -10,7 +10,8 @@ exports.loginValidator = [
 
 exports.authaticationValidator =
     [
-        check('Authorization').notEmpty().withMessage('Token required').custom((value) => {
+        check('Authorization').notEmpty().withMessage('Token required').custom((value) => 
+            {
             try {
                 const decode = jwt.verify(value.split(' ')[1], process.env.JWT_SECRET);
                 console.log(decode);

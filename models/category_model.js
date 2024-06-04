@@ -28,12 +28,14 @@ const categorySchema = new mangoose.Schema({
     timestamps: true,
     toJSON: {
         virtuals: true,
-    
+
     },
     toObject: { virtuals: true }
 }
 
 );
+
+
 
 // 2- create model
 const CategoryModel = mangoose.model('Category', categorySchema);

@@ -7,6 +7,7 @@ const subCategoryModel = require('../../models/sub_category_model');
 // create product validator 
 exports.createProductValidator =
     [
+
         check('name').notEmpty().withMessage('Title is required').isLength({ min: 3 }).withMessage('Title is too short').isLength({ max: 100 }).withMessage('Title is too long'),
         // check('slug').notEmpty().withMessage('Slug is required').isLength({ min: 3 }).withMessage('Slug is too short').isLength({ max: 100 }).withMessage('Slug is too long').isLowercase().withMessage('Slug must be lowercase'),
         check('description').notEmpty().withMessage('Description is required').isLength({ min: 3 }).withMessage('Description is too short').isLength({ max: 2000 }).withMessage('Description is too long'),
@@ -32,9 +33,10 @@ exports.createProductValidator =
             .custom((subcategoriesIds) =>
                 subCategoryModel.find({ _id: { $exists: true, $in: subcategoriesIds } }).then(
                     (result) => {
-                        if (result.length < 1 || result.length !== subcategoriesIds.length) {
+                        if (result.length < 1 || result.length !== subcategoriesIds.length) 
+                        {
                             return Promise.reject(new Error(`Invalid subcategories Ids`));
-                        }
+                        } 
                     }
                 )
             )
@@ -42,9 +44,11 @@ exports.createProductValidator =
             // value is subcategories ids in req.body
             .custom((val, { req }) =>
                 subCategoryModel.find({ category: req.body.category }).then(
-                    (subcategories) => {
+                    (subcategories) => 
+                        {
                         const subCategoriesIdsInDB = [];
-                        subcategories.forEach((subCategory) => {
+                        subcategories.forEach((subCategory) => 
+                            {
                             subCategoriesIdsInDB.push(subCategory._id.toString());
                         });
                         // check if subcategories ids in db include subcategories in req.body (true)
@@ -58,7 +62,8 @@ exports.createProductValidator =
                 )
             ),
 
-        check('brand').notEmpty().withMessage('Brand is required').isMongoId().withMessage('Brand must be a valid MongoId'),
+        check('brand').notEmpty().
+        withMessage('Brand is required').isMongoId().withMessage('Brand must be a valid MongoId'),
         validatorMiddleware
     ];
 

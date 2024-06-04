@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utility/error');
 const ApiFeatures = require('../utility/apiFeatures');
+const { apiResponse } = require('../utility/api_resource');
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -10,9 +11,8 @@ exports.deleteOne = (Model) =>
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
-    res.status(204).send(
-      JSON.stringify({ status: 'success', message: 'Document deleted' })
-    );
+
+    apiResponse(res, 204, 'Document deleted', null);
   });
 
 exports.updateOne = (Model) =>
@@ -26,14 +26,16 @@ exports.updateOne = (Model) =>
         new ApiError(`No document for this id ${req.params.id}`, 404)
       );
     }
-    res.status(200).json({ data: document });
+    apiResponse(res, 200, 'Document Updated', document);
+
   });
 
 exports.createOne = (Model) =>
-  asyncHandler(async (req, res) => 
-    {
+  asyncHandler(async (req, res) => {
+
     const newDoc = await Model.create(req.body);
-    res.status(201).json({ data: newDoc });
+    apiResponse(res, 200, 'Document created', newDoc);
+
   });
 
 exports.getOne = (Model) =>
@@ -43,7 +45,8 @@ exports.getOne = (Model) =>
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
-    res.status(200).json({ data: document });
+    apiResponse(res, 200, 'Document found', document);
+
   });
 
 exports.getAll = (Model, modelName = '') =>
@@ -65,7 +68,10 @@ exports.getAll = (Model, modelName = '') =>
     const { mongooseQuery, paginationResult } = apiFeatures;
     const documents = await mongooseQuery;
 
-    res
-      .status(200)
-      .json({ results: documents.length, paginationResult, data: documents });
+
+    apiResponse(res, 200, 'Documents retrieved', {
+      documents,
+      paginationResult,
+    });
+
   });

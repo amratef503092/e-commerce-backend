@@ -10,7 +10,8 @@ const subcategoriesRoute = require('./subcategory_route');
 
 router.route('/').get(categoryServices.getCategories).post(
     createCategoryValidator
-    , categoryServices.createCategory);
+    , 
+    categoryServices.createCategory);
 router.route('/:id').get(
     getCategoryValidator,
     categoryServices.getSpacifCategory).put(categoryServices.updateCategory).delete(categoryServices.deleteCategory);

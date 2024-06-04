@@ -75,7 +75,8 @@ exports.updateUserValidator = [
     validatorMiddleware,
 ];
 
-exports.deleteUserValidator = [
+exports.deleteUserValidator = 
+[
     check('id').isMongoId().withMessage('Invalid User id format'),
     validatorMiddleware,
 ];
