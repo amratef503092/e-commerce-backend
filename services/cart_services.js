@@ -12,7 +12,8 @@ const ProductModel = require('../models/product_model');
 // route  GET /api/v1/cart
 // access Private -> user only
 
-exports.getCartUser = async (req, res, next) => {
+exports.getCartUser = async (req, res, next) => 
+    {
     const user = req.user;
     console.log(user.id);
     const cart = await CartModel.findOne({ user: user.id });
@@ -95,8 +96,6 @@ exports.checkout = async (req, res, next) => {
         const discountedPrice = CalculatePrice.calculateDiscountPrice(product.productId);
         return acc + (discountedPrice * product.quantity);
     }, 0);
-
-
     const newOrder = await CheckoutOrder.create({
         user: user.id,
         products: products.map(product => ({

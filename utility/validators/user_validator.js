@@ -23,7 +23,8 @@ exports.createUserValidator = [
         .notEmpty()
         .withMessage('User password required')
         .isLength({ min: 6 })
-        .withMessage('Too short password').custom((value, { req }) => {
+        .withMessage('Too short password').custom((value, { req }) => 
+            {
             console.log(value);
             console.log(req.body.confirmPassword);
             if (value !== req.body.confirmPassword) {

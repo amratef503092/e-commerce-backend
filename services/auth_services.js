@@ -3,6 +3,7 @@ const ApiError = require('../utility/error');
 const apiResource = require('../utility/api_resource');
 const UserModel = require('../models/users_model');
 const otpModel = require('../models/otp_model');
+const AddressUserModel = require('../models/user_address_model');
 const { TokenService } = require("../utility/helper/functions");
 const { emailService } = require("./email_services");
 
@@ -62,11 +63,6 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @access  Private
 exports.getCurrentUser = asyncHandler(async (req, res, next) => {
     const { user } = req;
-    console.log(user.id);
-
-    if (!user || !user.online) {
-        return next(new ApiError(404, 'unauthorized access'));
-    }
     apiResource.apiResponse(res, 200, "success", user);
 });
 
@@ -205,10 +201,16 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    change password
-// @route   POST /api/v1/auth/changePassword
+// @route   Put /api/v1/auth/changePassword
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
     const { user } = req;
+
+
+
+    if (!user.comparePassword(req.body.oldPassword, user.password)) {
+        return next(new ApiError(400, 'invalid password'));
+    }
     user.password = req.body.newPassword;
     await user.save();
     return apiResource.apiResponse(res, 200, "success", "password changed successfully");

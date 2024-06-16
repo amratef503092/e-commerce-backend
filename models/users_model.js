@@ -2,8 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mangoose = require('mongoose');
-
-
+const AddressUserModel = require('./user_address_model');
 
 // 1- create schema
 
@@ -78,22 +77,20 @@ const UserSchema = new mangoose.Schema({
 
     {
         timestamps: true,
-        toJSON: {
-            virtuals: true,
-            transform: function (doc, ret) {
-                delete ret.__v;
-                ret.id = ret._id;
-                delete ret._id;
-            }
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
 
-        },
     }
 );
 
 
 
+
+
+
 // 2- hash password
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function (next) 
+{
     if (!this.isModified('password')) {
         next();
     }
@@ -129,12 +126,12 @@ UserSchema.methods.generateToken = function () {
 // }
 
 
+// show address in user
 
 
 // 2- create model
 
 const UserModel = mangoose.model('User', UserSchema);
 // 3- hash password
-
 
 module.exports = UserModel;

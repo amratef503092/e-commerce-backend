@@ -41,7 +41,7 @@ const checkoutOrderSchema = new mongoes.Schema(
         },
         status:
         {
-            type: ['pending', 'completed', 'cancelled'],
+            type: ['pending', 'completed', 'cancelled', 'shipped', 'delivered', 'returned'],
             default: 'pending',
             required: true
         }
@@ -58,15 +58,16 @@ const checkoutOrderSchema = new mongoes.Schema(
     }
 );
 
-checkoutOrderSchema.pre('find', function (next) {
+checkoutOrderSchema.pre('find', function (next) 
+{
     this.populate({
         path: 'user',
         // select: 'name email'
     }).
-    populate({
-        path: 'products.productId',
-        // select: 'name price'
-    })
+        populate({
+            path: 'products.productId',
+            // select: 'name price'
+        })
     next();
 });
 

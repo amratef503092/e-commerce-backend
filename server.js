@@ -1,6 +1,10 @@
 const express = require('express'); // import express
 const dotenv = require('dotenv');
 // to use the .env file
+const swaggerUi = require('swagger-ui-express');
+
+
+
 const app = express(); // create express app
 const morgan = require('morgan')
 
@@ -13,6 +17,9 @@ const brandRoute = require('./api/brand_route');
 const userRoute = require('./api/user_route');
 const authRoute = require('./api/auth_route');
 const cartRoute = require('./api/cart_route');
+const addressRoute = require('./api/address_route');
+const swaggerDocument = require('./swagger.json');
+
 
 const ApiError = require('./utility/error');
 const globalErrorHandlerMiddleware = require('./middleware/error_middleware');
@@ -28,6 +35,8 @@ database();
 // middleware
 app.use(express.json());
 
+
+
 // route 
 app.use('/api/v1/categories', categoryRoute);
 app.use('/api/v1/subcategories', subCategoryRoute);
@@ -36,6 +45,8 @@ app.use('/api/v1/brand', brandRoute);
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/cart', cartRoute);
+app.use('/api/v1/address', addressRoute);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 
